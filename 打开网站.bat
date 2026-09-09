@@ -1,55 +1,28 @@
 @echo off
 chcp 65001 >nul
-title 剪映全能翻译台 - 自动清理并启动
-color 0A
+title 剪映流水线 - 网站启动器
+color 0B
 
-echo ============================================================
-echo   [1/4] 🧹 正在清理后台卡死的 Python/Streamlit 进程...
-echo ============================================================
-taskkill /f /im python.exe >nul 2>&1
-taskkill /f /im pythonw.exe >nul 2>&1
-echo      ✅ 清理完毕！端口已释放。
+echo ==================================================
+echo          正在启动 剪映流水线 网站...
+echo ==================================================
 echo.
 
-echo ============================================================
-echo   [2/4] 📦 检查依赖环境...
-echo ============================================================
-if exist "%~dp0libs\streamlit" (
-    echo      ✅ 检测到自带依赖包，离线模式。
-    set "PYTHONPATH=%~dp0libs"
-) else (
-    echo      ⏳ 未检测到自带包，正在联网安装到 libs/ ...
-    python -m pip install --target "%~dp0libs" streamlit openai pyJianYingDraft
-    set "PYTHONPATH=%~dp0libs"
-)
-echo.
-
-echo ============================================================
-echo   [3/4] ⚙️ 写入配置文件，强制关闭开发模式并锁定 8501 端口...
-echo ============================================================
-if not exist "%~dp0.streamlit" mkdir "%~dp0.streamlit"
-(
-echo [global]
-echo developmentMode = false
-echo.
-echo [server]
-echo port = 8501
-echo headless = true
-echo.
-echo [browser]
-echo gatherUsageStats = false
-) > "%~dp0.streamlit\config.toml"
-echo      ✅ 已关闭开发模式，端口死死钉在 8501。
-echo.
-
-echo ============================================================
-echo   [4/4] 🚀 启动网站...
-echo ============================================================
-if not exist "%~dp0app.py" (
-    echo [❌] 找不到 app.py！请把这个 bat 放进项目文件夹。
+:: 1. 检查 app.py 是否存在
+if not exist "app.py" (
+    echo [❌ 错误] 找不到 app.py 文件！
+    echo 请确保这个 bat 文件和 app.py 放在同一个文件夹里。
     pause
     exit
 )
-echo [🚀] 正在启动网站，请勿关闭此窗口...
-python -m streamlit run "%~dp0app.py"
+
+:: 2. 启动网站
+echo [💡 提示] 浏览器即将自动打开...
+echo [⚠️ 注意] 运行期间请勿关闭此黑色窗口，关闭即停止网站！
+echo --------------------------------------------------
+python -m streamlit run app.py
+
+:: 3. 如果意外退出，暂停查看原因
+echo.
+echo [ℹ️] 网站已停止运行。
 pause
